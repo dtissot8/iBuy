@@ -1,0 +1,38 @@
+version: '3.4'
+
+services:
+  iBuy.api:
+    image: dtissot8/ibuy
+    container_name: iBuy.api
+    build:
+      context: .
+      dockerfile: iBuy/Dockerfile
+    command: dotnet ef database update && dotnet iBuy.dll
+    depends_on:
+      - iBuy.db
+    restart: always
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - iBuyNetwork
+
+  iBuy.db:
+    image: mongo:latest
+    container_name: iBuy.db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    volumes:
+      - ./data/db:/data/db
+      - ./mongod.conf:/etc/mongod.conf
+    command: ["-f", "/etc/mongod.conf", "--bind_ip_all"]
+    ports:
+      - 27017:27017
+    networks:
+      - iBuyNetwork
+
+volumes:
+  database-data:
+
+networks:
+  iBuyNetwork:
